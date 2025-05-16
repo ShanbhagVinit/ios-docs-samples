@@ -16,7 +16,7 @@
 import Foundation
 import googleapis
 
-let API_KEY : String = "YOUR_API_KEY"
+let API_KEY : String = ""
 let HOST = "speech.googleapis.com"
 
 typealias SpeechRecognitionCompletionHandler = (StreamingRecognizeResponse?, NSError?) -> (Void)
@@ -29,7 +29,7 @@ class SpeechRecognitionService {
   private var writer : GRXBufferedPipe!
   private var call : GRPCProtoCall!
 
-  static let sharedInstance = SpeechRecognitionService()
+  nonisolated(unsafe) static let sharedInstance = SpeechRecognitionService()
 
   func streamAudioData(_ audioData: NSData, completion: @escaping SpeechRecognitionCompletionHandler) {
     if (!streaming) {
@@ -57,14 +57,14 @@ class SpeechRecognitionService {
       let recognitionConfig = RecognitionConfig()
       recognitionConfig.encoding =  .linear16
       recognitionConfig.sampleRateHertz = Int32(sampleRate)
-      recognitionConfig.languageCode = "en-US"
+      recognitionConfig.languageCode = "kn-IN"
       recognitionConfig.maxAlternatives = 30
       recognitionConfig.enableWordTimeOffsets = true
-
+        
       let streamingRecognitionConfig = StreamingRecognitionConfig()
       streamingRecognitionConfig.config = recognitionConfig
       streamingRecognitionConfig.singleUtterance = false
-      streamingRecognitionConfig.interimResults = true
+      streamingRecognitionConfig.interimResults = false
 
       let streamingRecognizeRequest = StreamingRecognizeRequest()
       streamingRecognizeRequest.streamingConfig = streamingRecognitionConfig

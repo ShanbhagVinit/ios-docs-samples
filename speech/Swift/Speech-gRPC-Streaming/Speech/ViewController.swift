@@ -19,19 +19,20 @@ import googleapis
 
 let SAMPLE_RATE = 16000
 
-class ViewController : UIViewController, AudioControllerDelegate {
+class ViewController : UIViewController, @preconcurrency AudioControllerDelegate {
   @IBOutlet weak var textView: UITextView!
   var audioData: NSMutableData!
 
   override func viewDidLoad() {
     super.viewDidLoad()
+      self.textView.text =  "Try saying....\n WE"
     AudioController.sharedInstance.delegate = self
   }
 
   @IBAction func recordAudio(_ sender: NSObject) {
     let audioSession = AVAudioSession.sharedInstance()
     do {
-      try audioSession.setCategory(AVAudioSessionCategoryRecord)
+        try audioSession.setCategory(AVAudioSession.Category.record)
     } catch {
 
     }
@@ -71,6 +72,7 @@ class ViewController : UIViewController, AudioControllerDelegate {
                     if let result = result as? StreamingRecognitionResult {
                         if result.isFinal {
                             finished = true
+                            self?.processFinalStreamingResponse(result)
                         }
                     }
                 }
@@ -83,4 +85,32 @@ class ViewController : UIViewController, AudioControllerDelegate {
       self.audioData = NSMutableData()
     }
   }
+  
+    private func processFinalStreamingResponse(_ response: StreamingRecognitionResult) {
+        if response.alternativesArray.count == 0 {
+            showOKAlert(title: "Wrong", message: nil)
+            return
+        }
+        
+        if let first = response.alternativesArray.firstObject as? SpeechRecognitionAlternative {
+            let message = first.transcript ?? ""
+            
+            let result = "WE".compare(message, options: [.caseInsensitive, .diacriticInsensitive])
+            if result == .orderedSame {
+                showOKAlert(title: "Correct", message: message)
+            } else {
+                showOKAlert(title: "Wrong", message: message)
+            }
+        }
+    }
+    
+    private func showOKAlert(title: String, message: String?) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let okButton = UIAlertAction(title: "OK", style: .default) { _ in
+            self.dismiss(animated: true)
+            self.textView.text = "Try saying....\n"
+        }
+        alert.addAction(okButton)
+        present(alert, animated: true)
+    }
 }

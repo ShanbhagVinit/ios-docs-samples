@@ -25,7 +25,7 @@ class AudioController {
   var remoteIOUnit: AudioComponentInstance? // optional to allow it to be an inout argument
   var delegate : AudioControllerDelegate!
 
-  static var sharedInstance = AudioController()
+    nonisolated(unsafe) static let sharedInstance = AudioController()
 
   deinit {
     AudioComponentInstanceDispose(remoteIOUnit!);
@@ -37,7 +37,7 @@ class AudioController {
 
     let session = AVAudioSession.sharedInstance()
     do {
-      try session.setCategory(AVAudioSessionCategoryRecord)
+        try session.setCategory(AVAudioSession.Category.record)
       try session.setPreferredIOBufferDuration(10)
     } catch {
       return -1
